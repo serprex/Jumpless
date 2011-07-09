@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 from __future__ import division
 from pyglet import options as a
 a["debug_gl"]=False
-from pyglet.gl import glEnable,glDisable,glBlendFunc as awds,glClear,glVertex2f,glBegin,glEnd,glColor3fv,GLfloat as GLF1
+from pyglet.gl import glEnable,glDisable,glBlendFunc as awds,glClear,glVertex2f,glBegin,glEnd,glColor3fv,GLfloat as GLF1,glRectf
 from pyglet.clock import set_fps_limit as a,tick,get_fps
 a(30)
 from pyglet.image import load as ioad,TileableTexture
@@ -14,7 +14,7 @@ from collections import defaultdict
 GLF0=(GLF1*3)(0.,0.,0.)
 GLF1=(GLF1*3)(1.,1.,1.)
 LvL=iter(sorted(LvL for LvL in LvL(".") if LvL.endswith(".txt")))
-W=W(style="borderless",vsync=1)
+W=W(fullscreen=1)
 awds=[not not W.set_exclusive_mouse(),not not W.maximize(),not not glEnable(3042),not not awds(768,769)]
 @W.event
 def on_key_press(k,m):
@@ -225,13 +225,7 @@ try:
 		if Eleb:
 			glDisable(3042)
 			glColor3fv(GLF0)
-			glBegin(7)
-			for die in Eleb:
-				glVertex2f(die,0.)
-				glVertex2f(die+8,0.)
-				glVertex2f(die+8,W.height)
-				glVertex2f(die,W.height)
-			glEnd()
+			for die in Eleb:glRectf(die,0.,die+8,W.height)
 			glColor3fv(GLF1)
 			glEnable(3042)
 			for a in obj:a.x in Eleb and a.blit()
