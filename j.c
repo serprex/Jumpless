@@ -3,7 +3,7 @@
 #include <string.h>
 #include <GL/glfw.h>
 #include "tgen.h"
-#define case(x) break;case x:
+#define case(x) break;case x:;
 #define else(x) else if(x)
 #include <stdio.h>
 GLuint Ts;
@@ -26,14 +26,14 @@ typedef struct{
 	short w,h;
 	char*s;
 }Lt;
-Lt L0={9,7,
-"!:       "
-" #=-@    "
-"   #;-%%%"
-"  v ,-   "
-"    ^-   "
-"   .-    "
-"   #     "},
+Lt L0={7,7,
+"!:    -"
+" #=-@  "
+"   #;-%"
+"  v ,- "
+"    ^-="
+"   .-  "
+"   #  -"},
 L1={2,19,
 "@ "
 "vv"
@@ -47,25 +47,13 @@ L1={2,19,
 "%:"
 ": "
 "; "
-"  "
+"  "
 "vv"
 ".."
 "%:"
 ": "
 ";!"
 ": "},*LL;
-
-void bindTex(GLuint t){
-	glBindTexture(GL_TEXTURE_2D,t);
-}
-int makeTex(const void*px,int w,int h,int f){
-	bindTex(Ts);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D,0,f,w,h,0,f,GL_UNSIGNED_BYTE,px);
-}
 
 void drawRect(float x,float y,float tx,float ty){
 	tx/=8;
@@ -96,7 +84,10 @@ void loadL(Lt*L){
 				h=h->n=makeObj(3,x,y,1);
 				h->d[0]=0;
 			case('-')h=h->n=makeObj(4,x,y,0);
-			case('=')h=h->n=makeObj(5,x,y,0);
+			case('=')
+				h=h->n=makeObj(5,x,y,2);
+				h->d[0]=0;
+				h->d[1]=255;
 			case('v')h=h->n=makeObj(6,x,y,0);
 			case('^')h=h->n=makeObj(7,x,y,0);
 			case('(')h=h->n=makeObj(8,x,y,0);
@@ -140,6 +131,13 @@ void del(Obj*o){
 		}
 }
 
+int anybut(char t,float x,float y){
+	for(Obj*n=P;n;n=n->n)
+		if(n->t!=t&&n->x==x&&n->y==y)
+			return 1;
+	return 0;
+}
+
 int any(float x,float y){
 	for(Obj*n=P;n;n=n->n)
 		if(n->x==x&&n->y==y)
@@ -158,7 +156,12 @@ int main(int argc,char**argv){
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glColor3ub(255,255,255);
 	glGenTextures(1,&Ts);
-	makeTex(g,gW,gH,gF);
+	glBindTexture(GL_TEXTURE_2D,Ts);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D,0,gF,gW,gH,0,gF,GL_UNSIGNED_BYTE,g);
 	P=makeObj(0,0,0,0);
 	loadL(&L0);
 	for(;;){
@@ -176,7 +179,7 @@ int main(int argc,char**argv){
 					goto walk;
 				}
 				if(n->x!=(int)n->x){
-					walk:if(!oat(2,n->x+Pd,n->y)){
+					walk:if(!(oat(2,n->x+Pd,n->y)||oat(3,n->x+Pd,n->y))){
 						if(o=oat(13,n->x+Pd,n->y)){
 							if(Pk[o->d[0]]){
 								Pk[o->d[0]]--;
@@ -186,13 +189,13 @@ int main(int argc,char**argv){
 						n->x+=Pd/8.;
 						nokey:;
 					}
-				}else if(oat(5,n->x,n->y)&&Kv&&!(Kv==1&&oat(7,n->x,n->y+1)||Kv==-1&&oat(6,n->x,n->y-1))){
+				}else if(Kv&&((oat(5,n->x,n->y)&&!any(n->x,n->y+Kv))||(oat(4,n->x,n->y))&&!(oat(Kv==1?7:6,n->x,n->y+Kv)||oat(10,n->x,n->y+Kv)||oat(11,n->x,n->y+Kv)||oat(13,n->x,n->y+Kv)))){
 					Pu=Kv;
 					goto vert;
-				}else if(Kv==-1&&(oat(4,n->x,n->y)||oat(7,n->x,n->y))){
+				}else if(Kv==-1&&oat(7,n->x,n->y)){
 					Pu=-1;
 					goto vert;
-				}else if(Kv==1&&(oat(4,n->x,n->y)||oat(6,n->x,n->y)||oat(6,n->x,n->y+1)||(oat(4,n->x,n->y+1)&&!oat(7,n->x,n->y)))){
+				}else if(Kv==1&&(oat(6,n->x,n->y)||oat(6,n->x,n->y+1)||(oat(4,n->x,n->y+1)&&!(oat(5,n->x,n->y)||oat(7,n->x,n->y))))){
 					Pu=1;
 					goto vert;
 				}
@@ -215,7 +218,8 @@ int main(int argc,char**argv){
 				}
 				if(n->y!=(int)n->y){
 					vert:
-					if(o=oat(5,n->x,n->y))o->y+=Pu/8.;
+					if(o=oat(5,n->x,n->y))
+						o->y+=Pu/8.;
 					n->y+=Pu/8.;
 				}else if(n->x==(int)n->x&&!any(n->x,n->y+1)&&!(oat(4,n->x,n->y)||oat(5,n->x,n->y)||oat(6,n->x,n->y)||oat(7,n->x,n->y)||oat(8,n->x,n->y)||oat(9,n->x,n->y))){
 					Pu=4;
@@ -227,7 +231,36 @@ int main(int argc,char**argv){
 			case(2)drawRect(n->x,n->y,2,0);
 			case(3)drawRect(n->x,n->y,n->d[0]>>5,3);
 			case(4)drawRect(n->x,n->y,4,0);
-			case(5)drawRect(n->x,n->y,6,4);
+			case(5)
+				int y=n->y;
+				n->d[0]-=n->d[0]>0;
+				n->d[1]+=n->d[1]<255;
+				int lo,hi;
+				for(int lo=y-1;lo>=n->d[0]>>2;lo--){
+					if(anybut(0,n->x,lo)){
+						n->d[0]=4+lo*4;
+						break;
+					}
+				}
+				for(int hi=y+1;hi<=n->d[1]>>2;hi++){
+					if(anybut(0,n->x,hi)){
+						n->d[1]=hi*4;
+						break;
+					}
+				}
+				glEnd();
+				glBindTexture(GL_TEXTURE_2D,0);
+				glBegin(GL_POINTS);
+				for(int i=n->d[0];i<=n->d[1];i++){
+					if(i/4.<n->y||i/4.>n->y+1){
+						glVertex2f(n->x,i/4.);
+						glVertex2f(n->x+1,i/4.);
+					}
+				}
+				glEnd();
+				glBindTexture(GL_TEXTURE_2D,Ts);
+				glBegin(GL_QUADS);
+				drawRect(n->x,n->y,6,4);
 			case(6)drawRect(n->x,n->y,7,0);
 			case(7)drawRect(n->x,n->y,7,1);
 			case(8)drawRect(n->x,n->y,5,0);
