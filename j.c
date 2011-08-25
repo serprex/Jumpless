@@ -160,7 +160,6 @@ int any(float x,float y){
 			return 1;
 	return 0;
 }
-
 int main(int argc,char**argv){
 	glfwInit();
 	glfwDisable(GLFW_AUTO_POLL_EVENTS);
@@ -169,6 +168,7 @@ int main(int argc,char**argv){
 	int wihe=gvm.Height>1024?1024:gvm.Height>512?512:256;
 	glfwOpenWindow(wihe,wihe,0,0,0,0,0,0,GLFW_WINDOW);
 	glOrtho(0,64,64,0,1,-1);
+	glPointSize(wihe/512);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -183,7 +183,7 @@ int main(int argc,char**argv){
 	P=makeObj(0,0,0,0);
 	P->n=0;
 	loadL(LL);
-	srand(glfwGetTime()*10e5);
+	srand(glfwGetTime()*10e6);
 	for(;;){
 		if(P->y>64||glfwGetKey(GLFW_KEY_SPACE))loadL(LL);
 		glClear(GL_COLOR_BUFFER_BIT);
