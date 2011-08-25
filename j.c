@@ -171,7 +171,7 @@ int main(int argc,char**argv){
 		Kv=glfwGetKey(GLFW_KEY_DOWN)-glfwGetKey(GLFW_KEY_UP);
 		Kh=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
 		for(Obj*n=P;n;n=n->n){
-			switch(n->t){
+			gomo:switch(n->t){
 			Obj*o;
 			case(0)
 				if(Pu!=4&&Kh){
@@ -205,6 +205,13 @@ int main(int argc,char**argv){
 				if(o=oat(3,n->x,n->y+1)){
 					if(!(o->d[0]+=4))
 						del(o);
+					if(rand()&1){
+						o=makeObj(14,n->x+(rand()&7)/8.,n->y,8);
+						o->n=P->n;
+						P->n=o;
+						((float*)o->d)[0]=-(rand()&255)/4096.;
+						((float*)o->d)[1]=(4-(rand()%9))/96.;
+					}
 				}
 				if((o=oat(12,n->x,n->y))||(o=oat(12,n->x,n->y+1))){
 					Pk[o->d[0]]++;
@@ -269,9 +276,23 @@ int main(int argc,char**argv){
 			case(11)drawRect(n->x,n->y,4,n->d[0]--/51);
 			case(12)drawRect(n->x,n->y,n->d[0],1);
 			case(13)drawRect(n->x,n->y,n->d[0],2);
+			case(14)
+				glEnd();
+				glBindTexture(GL_TEXTURE_2D,0);
+				glBegin(GL_POINTS);
+				glVertex2f(n->x+=((float*)n->d)[1],n->y+=((float*)n->d)[0]+=.02);
+				glEnd();
+				glBindTexture(GL_TEXTURE_2D,Ts);
+				glBegin(GL_QUADS);
+				if(n->y>64){
+					o=n->n;
+					del(n);
+					if(n=o)goto gomo;
+					goto nomo;
+				}
 			}
 		}
-		glEnd();
+		nomo:glEnd();
 		glfwSwapBuffers();
 		double gT=1./59-glfwGetTime();
 		glfwSleep(gT);
