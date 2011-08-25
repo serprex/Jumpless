@@ -4,7 +4,6 @@
 #include "tgen.h"
 #define case(x) break;case x:;
 #define else(x) else if(x)
-#include <stdio.h>
 GLuint Ts;
 typedef struct Obj{
 	struct Obj*n;
@@ -29,10 +28,10 @@ Lt L[]={{12,8,
 "         v  "
 "!:     ((-))"
 " #=-@    -  "
-"   #;-%>>   "
-"  v ,- ))   "
-" ^  ^-= <<  "
-" ^-.-  ((  #"
+"^  #;-%>>   "
+"^ v ,- ))   "
+"^   ^-= <<  "
+"^- .-  ((  #"
 "   #^ ----> "},
 {2,19,
 "@ "
@@ -70,13 +69,18 @@ void drawRect_(float x,float y,float a,float b,float h,float v){
 void drawRect(float x,float y,float a,float b){
 	drawRect_(x,y,a,b,0,0);
 }
-
 void loadL(Lt*L){
+	for(Obj*h=P->n;h;){
+		Obj*n=h;
+		h=h->n;
+		free(n);
+	}
 	Obj*h=P;
-	for(int x=0;x<L->w;x++)
-		for(int y=0;y<L->h;y++){
-			int t;
-			switch(L->s[y*L->w+x]){
+	int Lx=64-L->w>>1,Ly=64-L->h>>1;
+	for(int xx=0;xx<L->w;xx++)
+		for(int yy=0;yy<L->h;yy++){
+			float x=Lx+xx,y=Ly+yy;
+			switch(L->s[yy*L->w+xx]){
 			case('@')
 				P->x=x;
 				P->y=y;
@@ -97,30 +101,30 @@ void loadL(Lt*L){
 				h=h->n=makeObj(6,x,y,1);
 				h->d[0]=1;
 			case('(')
-				h=h->n=makeObj(8,x,y,1);
+				h=h->n=makeObj(7,x,y,1);
 				h->d[0]=0;
 			case(')')
-				h=h->n=makeObj(8,x,y,1);
+				h=h->n=makeObj(7,x,y,1);
 				h->d[0]=1;
 			case('<')
-				h=h->n=makeObj(10,x,y,2);
+				h=h->n=makeObj(8,x,y,2);
 				h->d[0]=0;
 				h->d[1]=1;
 			case('>')
-				h=h->n=makeObj(10,x,y,2);
+				h=h->n=makeObj(8,x,y,2);
 				h->d[0]=0;
 				h->d[1]=0;
 			case('.')
-				h=h->n=makeObj(12,x,y,1);
+				h=h->n=makeObj(9,x,y,1);
 				h->d[0]=0;
 			case(',')
-				h=h->n=makeObj(12,x,y,1);
+				h=h->n=makeObj(9,x,y,1);
 				h->d[0]=1;
 			case(':')
-				h=h->n=makeObj(13,x,y,1);
+				h=h->n=makeObj(10,x,y,1);
 				h->d[0]=0;
 			case(';')
-				h=h->n=makeObj(13,x,y,1);
+				h=h->n=makeObj(10,x,y,1);
 				h->d[0]=1;
 			}
 		}
@@ -159,9 +163,11 @@ int any(float x,float y){
 
 int main(int argc,char**argv){
 	glfwInit();
-	srand(glfwGetTime()*10e5);
-	glfwOpenWindow(512,512,0,0,0,0,0,0,GLFW_WINDOW);
 	glfwDisable(GLFW_AUTO_POLL_EVENTS);
+	GLFWvidmode gvm;
+	glfwGetDesktopMode(&gvm);
+	int wihe=gvm.Height>1024?1024:gvm.Height>512?512:256;
+	glfwOpenWindow(wihe,wihe,0,0,0,0,0,0,GLFW_WINDOW);
 	glOrtho(0,64,64,0,1,-1);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -175,7 +181,9 @@ int main(int argc,char**argv){
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D,0,gF,gW,gH,0,gF,GL_UNSIGNED_BYTE,g);
 	P=makeObj(0,0,0,0);
+	P->n=0;
 	loadL(LL);
+	srand(glfwGetTime()*10e5);
 	for(;;){
 		if(P->y>64||glfwGetKey(GLFW_KEY_SPACE))loadL(LL);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -189,12 +197,12 @@ int main(int argc,char**argv){
 			case(0)
 				if(n->x!=(int)n->x){
 					walk:n->x+=Pd/8.;
-				}else if(Pu!=4&&((o=oat(10,n->x,n->y+1))||Kh)){
+				}else if(Pu!=4&&((o=oat(8,n->x,n->y+1))||Kh)){
 					Pd=Kh;
 					if(o)Pd+=o->d[1]?-1:1;
 					int pd=Pd>0?1:Pd<0?-1:0;
-					if(!((o=oat(8,n->x+pd,n->y))&&pd!=(o->d[0]?:-1)||oat(2,n->x+pd,n->y)||oat(3,n->x+pd,n->y)||oat(10,n->x+pd,n->y))){
-						if(o=oat(13,n->x+pd,n->y)){
+					if(!((o=oat(7,n->x+pd,n->y))&&pd!=(o->d[0]?:-1)||oat(2,n->x+pd,n->y)||oat(3,n->x+pd,n->y)||oat(8,n->x+pd,n->y))){
+						if(o=oat(10,n->x+pd,n->y)){
 							if(Pk[o->d[0]]){
 								Pk[o->d[0]]--;
 								del(o);
@@ -203,13 +211,13 @@ int main(int argc,char**argv){
 						goto walk;
 					}
 					nokey:;
-				}else if(Kv&&((oat(5,n->x,n->y)&&!any(n->x,n->y+Kv))||(oat(4,n->x,n->y))&&!(((o=oat(6,n->x,n->y+Kv))&&Kv==(o->d[0]?:-1))||oat(10,n->x,n->y+Kv)||oat(13,n->x,n->y+Kv)))){
+				}else if(Kv&&((oat(5,n->x,n->y)&&!any(n->x,n->y+Kv))||(oat(4,n->x,n->y)&&!(oat(2,n->x,n->y+Kv)||oat(3,n->x,n->y+Kv)||oat(8,n->x,n->y+Kv)))&&!(((o=oat(6,n->x,n->y+Kv))&&Kv==(o->d[0]?:-1))||oat(8,n->x,n->y+Kv)||oat(10,n->x,n->y+Kv)))){
 					Pu=Kv;
 					goto vert;
-				}else if(Kv==-1&&(o=oat(6,n->x,n->y))&&o->d[0]==1){
+				}else if(Kv==-1&&(o=oat(6,n->x,n->y))&&o->d[0]==1&&!(oat(2,n->x,n->y-1)||oat(3,n->x,n->y-1)||oat(8,n->x,n->y-1))){
 					Pu=-1;
 					goto vert;
-				}else if(Kv==1&&(((o=oat(6,n->x,n->y))&&o->d[0]==0||(o=oat(6,n->x,n->y+1))&&o->d[0]==0)||(oat(4,n->x,n->y+1)&&!(oat(5,n->x,n->y)||((o=oat(6,n->x,n->y))&&o->d[0]==1))))){
+				}else if(Kv==1&&!(oat(2,n->x,n->y+1)||oat(3,n->x,n->y+1)||oat(8,n->x,n->y+1))&&(((o=oat(6,n->x,n->y))&&o->d[0]==0||(o=oat(6,n->x,n->y+1))&&o->d[0]==0)||(oat(4,n->x,n->y+1)&&!(oat(5,n->x,n->y)||((o=oat(6,n->x,n->y))&&o->d[0]==1))))){
 					Pu=1;
 					goto vert;
 				}
@@ -220,18 +228,18 @@ int main(int argc,char**argv){
 					if(!(o->d[0]+=4))
 						del(o);
 					if(rand()&1){
-						o=makeObj(14,n->x+(rand()&7)/8.,n->y,8);
+						o=makeObj(11,n->x+(rand()&7)/8.,n->y,8);
 						o->n=P->n;
 						P->n=o;
 						((float*)o->d)[0]=-(rand()&255)/4096.;
 						((float*)o->d)[1]=(4-(rand()%9))/96.;
 					}
 				}
-				if((o=oat(12,n->x,n->y))||(o=oat(12,n->x,n->y+1))){
+				if((o=oat(9,n->x,n->y))||(o=oat(9,n->x,n->y+1))){
 					Pk[o->d[0]]++;
 					del(o);
 				}
-				if(o=oat(13,n->x,n->y+1)){
+				if(o=oat(10,n->x,n->y+1)){
 					if(Pk[o->d[0]]){
 						Pk[o->d[0]]--;
 						del(o);
@@ -242,13 +250,13 @@ int main(int argc,char**argv){
 					if(o=oat(5,n->x,n->y))
 						o->y+=Pu/8.;
 					n->y+=Pu/8.;
-				}else if(n->x==(int)n->x&&!any(n->x,n->y+1)&&!(oat(4,n->x,n->y)||oat(5,n->x,n->y)||oat(6,n->x,n->y)||oat(7,n->x,n->y)||oat(8,n->x,n->y)||oat(9,n->x,n->y))){
+				}else if(n->x==(int)n->x&&!any(n->x,n->y+1)&&!anybut(0,n->x,n->y)){
 					Pu=4;
 					goto vert;
 				}else Pu=0;
 				drawRect_(n->x,n->y,0,0,Kp,0);
 			case(1)drawRect(n->x,n->y,2,0);
-			case(2)drawRect(n->x,n->y,1,0);
+			case(2)drawRect(n->x,n->y,0,3);
 			case(3)drawRect(n->x,n->y,n->d[0]>>5,2);
 			case(4)drawRect(n->x,n->y,3,0);
 			case(5)
@@ -271,10 +279,10 @@ int main(int argc,char**argv){
 				glEnd();
 				glBindTexture(GL_TEXTURE_2D,0);
 				glBegin(GL_POINTS);
-				for(int i=n->d[0];i<=n->d[1];i++){
+				for(int i=n->d[0];i<n->d[1];i++){
 					if(i/4.<n->y||i/4.>n->y+1){
-						glVertex2f(n->x,i/4.);
-						glVertex2f(n->x+1,i/4.);
+						glVertex2f(n->x,i/4.+1./8);
+						glVertex2f(n->x+1,i/4.+1./8);
 					}
 				}
 				glEnd();
@@ -282,11 +290,11 @@ int main(int argc,char**argv){
 				glBegin(GL_QUADS);
 				drawRect(n->x,n->y,6,0);
 			case(6)drawRect_(n->x,n->y,5,0,0,n->d[0]);
-			case(8)drawRect_(n->x,n->y,4,0,n->d[0],0);
-			case(10)drawRect(n->x,n->y,(n->d[0]+=(n->d[1]?4:-4))/43,3);
-			case(12)drawRect(n->x,n->y,n->d[0],1);
-			case(13)drawRect(n->x,n->y,4+n->d[0],1);
-			case(14)
+			case(7)drawRect_(n->x,n->y,4,0,n->d[0],0);
+			case(8)drawRect(n->x,n->y,(n->d[0]+=(n->d[1]?4:-4))/43,3);
+			case(9)drawRect(n->x,n->y,n->d[0],1);
+			case(10)drawRect(n->x,n->y,4+n->d[0],1);
+			case(11)
 				glEnd();
 				glBindTexture(GL_TEXTURE_2D,0);
 				glBegin(GL_POINTS);
