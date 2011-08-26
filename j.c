@@ -112,11 +112,11 @@ int main(int argc,char**argv){
 	srand(glfwGetTime()*10e6);
 	for(;;){
 		if(P->y>64||glfwGetKey(GLFW_KEY_SPACE))loadL(*LL);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glBegin(GL_QUADS);
 		Kv=glfwGetKey(GLFW_KEY_DOWN)-glfwGetKey(GLFW_KEY_UP);
 		Kh=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
 		if(Kh)Kp=Kh==1;
+		glClear(GL_COLOR_BUFFER_BIT);
+		glBegin(GL_QUADS);
 		for(Obj*n=P;n;n=n->n){
 			gomo:switch(n->t){
 			Obj*o;

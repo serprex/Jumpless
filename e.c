@@ -45,7 +45,7 @@ void drawObj(Obj*n){
 	case(0)drawRect(n->x,n->y,0,0);
 	case(1)drawRect(n->x,n->y,2,0);
 	case(2)drawRect(n->x,n->y,0,3);
-	case(3)drawRect(n->x,n->y,n->d[0]>>5,2);
+	case(3)drawRect(n->x,n->y,(n->d[0]++)>>5,2);
 	case(4)drawRect(n->x,n->y,3,0);
 	case(5)drawRect(n->x,n->y,6,0);
 	case(6)drawRect_(n->x,n->y,5,0,0,n->d[0]);
@@ -106,6 +106,7 @@ int main(int argc,char**argv){
 	glPointSize(wihe/512);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
+	glLogicOp(GL_XOR);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glColor3ub(255,255,255);
 	glGenTextures(1,&Ts);
@@ -167,6 +168,11 @@ int main(int argc,char**argv){
 		for(Obj*n=Rost;n;n=n->n)
 			drawObj(n);
 		glEnd();
+		glBindTexture(GL_TEXTURE_2D,0);
+		glEnable(GL_COLOR_LOGIC_OP);
+		glRecti(et,0,et+1,1);
+		glDisable(GL_COLOR_LOGIC_OP);
+		glBindTexture(GL_TEXTURE_2D,Ts);
 		glfwSwapBuffers();
 		glfwSleep(1./30);
 		glfwPollEvents();
