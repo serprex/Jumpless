@@ -14,8 +14,7 @@ typedef struct Obj{
 	unsigned char d[];
 }Obj;
 Obj**Ps,*P,*Rost;;
-int Pp,KT,BT,Ls=sizeof(L)/sizeof(char*);
-char et='@';
+int Pp,KT,BT,Ls=sizeof(L)/sizeof(char*),et;
 Obj*makeObj(char t,float x,float y,int l,char*d){
 	Obj*r=malloc(l+sizeof(Obj));
 	r->t=t;
@@ -56,48 +55,9 @@ void drawObj(Obj*n){
 	case(10)drawRect(n->x,n->y,4+n->d[0],1);
 	}
 }
-char chtype(char c){
-	switch(c){
-	case('@')return 0;
-	case('!')return 1;
-	case('#')return 2;
-	case('%')return 3;
-	case('-')return 4;
-	case('=')return 5;
-	case('v')return 6;
-	case('^')return 6;
-	case('(')return 7;
-	case(')')return 7;
-	case('<')return 8;
-	case('>')return 8;
-	case('.')return 9;
-	case(',')return 9;
-	case(':')return 10;
-	case(';')return 10;
-	}
-}
 
-Obj*chob(char c,float x,float y){
-	switch(c){
-	case('@')return makeObj(0,x,y,0,"");
-	case('!')return makeObj(1,x,y,0,"");
-	case('#')return makeObj(2,x,y,0,"");
-	case('%')return makeObj(3,x,y,1,"\0");
-	case('-')return makeObj(4,x,y,0,"");
-	case('=')return makeObj(5,x,y,2,"\0\377");
-	case('v')return makeObj(6,x,y,1,"\0");
-	case('^')return makeObj(6,x,y,1,"\1");
-	case('(')return makeObj(7,x,y,1,"\0");
-	case(')')return makeObj(7,x,y,1,"\1");
-	case('<')return makeObj(8,x,y,2,"\0\1");
-	case('>')return makeObj(8,x,y,2,"\0\0");
-	case('.')return makeObj(9,x,y,1,"\0");
-	case(',')return makeObj(9,x,y,1,"\1");
-	case(':')return makeObj(10,x,y,1,"\0");
-	case(';')return makeObj(10,x,y,1,"\1");
-	}
-	return 0;
-}
+char*chmem[]={"","","","\1","","\2\0\377","\1","\1\1","\1","\1\1","\2\0\1","\2\0","\1","\1\1","\1","\1\1"},
+	chtype[]={0,1,2,3,4,5,6,6,7,7,8,8,9,9,10,10};
 
 void loadL(unsigned char*L){
 	float Lx=64-L[0]>>1,Ly=64-L[1]>>1;
@@ -114,6 +74,16 @@ Obj*oat(char t,float x,float y){
 		if(n->t==t&&n->x==x&&n->y==y)
 			return n;
 	return 0;
+}
+
+void dat(float x,float y){
+	for(Obj*n=P;n&&n->n;n=n->n)
+		if(n->n->x==x&&n->n->y==y){
+			Obj*o=n->n;
+			n->n=n->n->n;
+			free(o);
+			return;
+		}
 }
 
 void del(Obj*o){
@@ -154,7 +124,7 @@ int main(int argc,char**argv){
 	Rost=makeObj(0,0,0,0,"");
 	Obj*ro=Rost;
 	for(int i=1;i<16;i++){
-		ro=ro->n=chob("@!#%-=v^()<>.,:;"[i],i,0);
+		ro=ro->n=makeObj(chtype[i],i,0,*chmem[i],chmem[i]+1);
 	}
 	ro->n=0;
 	for(;;){
@@ -166,7 +136,8 @@ int main(int argc,char**argv){
 			if(Pp==Ls)Pp=0;
 			P=Ps[Pp];
 		}
-		if(glfwGetMouseButton(0)&&!BT){
+		int b;
+		if((glfwGetMouseButton(b=0)||glfwGetMouseButton(b=1)||glfwGetMouseButton(b=2))&&!BT){
 			BT=6;
 			Obj*o;
 			int x,y;
@@ -174,15 +145,16 @@ int main(int argc,char**argv){
 			x/=wihe/64;
 			y/=wihe/64;
 			if(y==0&&x<16){
-				et="@!#%-=v^()<>.,:;"[x];
-			}else if(y>0){
-				if(et=='@'){
-					P->x=x;
-					P->y=y;
-				}else if(o=oat(chtype(et),x,y)){
-					del(o);
-				}else{
-					o=chob(et,x,y);
+				et=x;
+			}else if(!et){
+				P->x=x;
+				P->y=y;
+			}else if(o=oat(chtype[et],x,y)){
+				del(o);
+			}else{
+				if(b!=1)dat(x,y);
+				if(b!=2){
+					o=makeObj(chtype[et],x,y,*chmem[et],chmem[et]+1);
 					o->n=P->n;
 					P->n=o;
 				}

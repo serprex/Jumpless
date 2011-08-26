@@ -107,6 +107,7 @@ int main(int argc,char**argv){
 	glTexImage2D(GL_TEXTURE_2D,0,gF,gW,gH,0,gF,GL_UNSIGNED_BYTE,g);
 	P=makeObj(0,0,0,0,"");
 	P->n=0;
+	if(argc>1)LL+=atoi(argv[1]);
 	loadL(*LL);
 	srand(glfwGetTime()*10e6);
 	for(;;){
