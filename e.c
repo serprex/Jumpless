@@ -13,7 +13,7 @@ typedef struct Obj{
 	char t;
 	unsigned char d[];
 }Obj;
-Obj**Ps,*P,*Rost;;
+Obj**Ps,*P,*Rost;
 int Pp,KT,BT,Ls=sizeof(L)/sizeof(char*),et;
 Obj*makeObj(char t,float x,float y,int l,char*d){
 	Obj*r=malloc(l+sizeof(Obj));
@@ -136,6 +136,16 @@ int main(int argc,char**argv){
 			Pp++;
 			if(Pp==Ls)Pp=0;
 			P=Ps[Pp];
+		}else if(glfwGetKey('N')&&P->n){
+			Ps=realloc(Ps,sizeof(Obj*)*++Ls);
+			Ps[Pp=Ls-1]=P=makeObj(0,64,64,0,"");
+			P->n=0;
+		}else if(glfwGetKey(GLFW_KEY_BACKSPACE)&&!BT&&Ls>1){
+			BT=9;
+			memmove(Ps+Pp,Ps+Pp+1,(Ls-Pp-1)*sizeof(Obj*));
+			for(Obj*n=P,*o;n;o=n,n=n->n,free(o));
+			Ps=realloc(Ps,sizeof(Obj*)*--Ls);
+			P=Ps[Pp-=Pp==Ls];
 		}
 		int b;
 		if((glfwGetMouseButton(b=0)||glfwGetMouseButton(b=1)||glfwGetMouseButton(b=2))&&!BT){
