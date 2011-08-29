@@ -9,20 +9,19 @@ GLuint Ts;
 typedef struct Obj{
 	struct Obj*n;
 	float x,y;
-	char t;
-	unsigned char d[];
+	unsigned char t,d[];
 }Obj;
 Obj*P;
 int Pd,Pu,Pk[2],Kv,Kh,Kp;
-Obj*makeObj(char t,float x,float y,int l,char*d){
-	Obj*r=malloc(l+sizeof(Obj));
+char sizeObj[]={0,0,0,1,0,2,1,1,2,1,1,0,8};
+Obj*makeObj(char t,float x,float y,char*d){
+	Obj*r=malloc(sizeof(Obj)+sizeObj[t]);
 	r->t=t;
 	r->x=x;
 	r->y=y;
-	memcpy(r->d,d,l);
+	memcpy(r->d,d,sizeObj[t]);
 	return r;
 }
-unsigned char sizeObj[]={0,0,0,1,0,2,1,1,2,1,1};
 
 void drawRect_(float x,float y,float a,float b,float h,float v){
 	a/=8;
@@ -52,7 +51,7 @@ void loadL(unsigned char*L){
 	P->y=Ly+L[3];
 	Obj*h=P;
 	for(char*p=L+4;*p;p+=3+sizeObj[*p])
-		h=h->n=makeObj(*p,Lx+p[1],Ly+p[2],sizeObj[*p],p+3);
+		h=h->n=makeObj(*p,Lx+p[1],Ly+p[2],p+3);
 	h->n=0;
 }
 
@@ -74,14 +73,14 @@ void del(Obj*o){
 
 int anybut(char t,float x,float y){
 	for(Obj*n=P;n;n=n->n)
-		if(n->t!=t&&n->x==x&&n->y==y)
+		if(n->t!=12&&n->t!=t&&n->x==x&&n->y==y)
 			return 1;
 	return 0;
 }
 
 int any(float x,float y){
 	for(Obj*n=P;n;n=n->n)
-		if(n->x==x&&n->y==y)
+		if(n->t!=12&&n->x==x&&n->y==y)
 			return 1;
 	return 0;
 }
@@ -105,7 +104,7 @@ int main(int argc,char**argv){
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D,0,gF,gW,gH,0,gF,GL_UNSIGNED_BYTE,g);
-	P=makeObj(0,0,0,0,"");
+	P=makeObj(0,0,0,"");
 	P->n=0;
 	if(argc>1)LL+=atoi(argv[1]);
 	loadL(*LL);
@@ -127,7 +126,7 @@ int main(int argc,char**argv){
 					Pd=Kh;
 					if(o)Pd+=o->d[1]?-1:1;
 					int pd=Pd>0?1:Pd<0?-1:0;
-					if(!((o=oat(7,n->x+pd,n->y))&&pd!=(o->d[0]?:-1)||oat(2,n->x+pd,n->y)||oat(3,n->x+pd,n->y)||oat(8,n->x+pd,n->y))){
+					if(!((o=oat(7,n->x+pd,n->y))&&pd!=(o->d[0]?:-1)||oat(2,n->x+pd,n->y)||oat(3,n->x+pd,n->y)||oat(8,n->x+pd,n->y)||(oat(11,n->x+pd,n->y)&&any(n->x+pd*2,n->y)))){
 						if(o=oat(10,n->x+pd,n->y)){
 							if(Pk[o->d[0]]){
 								Pk[o->d[0]]--;
@@ -154,7 +153,7 @@ int main(int argc,char**argv){
 					if(!(o->d[0]+=4))
 						del(o);
 					if(rand()&1){
-						o=makeObj(11,n->x+(rand()&7)/8.,n->y,8,"01234567");
+						o=makeObj(12,n->x+(rand()&7)/8.,n->y,sizeObj);
 						o->n=P->n;
 						P->n=o;
 						((float*)o->d)[0]=-(rand()&255)/4096.;
@@ -182,7 +181,7 @@ int main(int argc,char**argv){
 				}else Pu=0;
 				drawRect_(n->x,n->y,0,0,Kp,0);
 			case(1)drawRect(n->x,n->y,2,0);
-			case(2)drawRect(n->x,n->y,0,3);
+			case(2)drawRect(n->x,n->y,1,0);
 			case(3)drawRect(n->x,n->y,n->d[0]>>5,2);
 			case(4)drawRect(n->x,n->y,3,0);
 			case(5)
@@ -221,6 +220,12 @@ int main(int argc,char**argv){
 			case(9)drawRect(n->x,n->y,n->d[0],1);
 			case(10)drawRect(n->x,n->y,4+n->d[0],1);
 			case(11)
+				if(P->x<n->x&&n->x-P->x<1)n->x=P->x+1;
+				else if(n->x<P->x&&P->x-n->x<1)n->x=P->x-1;
+				else if((o=oat(8,n->x,n->y+1))&&!oat(1,n->x+(o->d[1]?2:-2),n->y)&&!oat(2,n->x+(o->d[1]?2:-2),n->y)&&!oat(3,n->x+(o->d[1]?2:-2),n->y))n->x+=(o->d[1]?:-1)/8.;
+				drawRect(n->x,n->y,7,3);
+				if(!any(n->x,n->y+1))n->y+=.5;
+			case(12)
 				glEnd();
 				glBindTexture(GL_TEXTURE_2D,0);
 				glBegin(GL_POINTS);
