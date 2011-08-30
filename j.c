@@ -99,8 +99,6 @@ int main(int argc,char**argv){
 	glColor3ub(255,255,255);
 	glGenTextures(1,&Ts);
 	glBindTexture(GL_TEXTURE_2D,Ts);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D,0,gF,gW,gH,0,gF,GL_UNSIGNED_BYTE,g);
@@ -111,6 +109,10 @@ int main(int argc,char**argv){
 	srand(glfwGetTime()*10e6);
 	for(;;){
 		if(P->y>64||glfwGetKey(GLFW_KEY_SPACE))loadL(*LL);
+		if(glfwGetKey(GLFW_KEY_ENTER)&&*(short*)*LL!=0x101){
+			glfwSleep(.3);
+			loadL(*++LL);
+		}
 		Kv=glfwGetKey(GLFW_KEY_DOWN)-glfwGetKey(GLFW_KEY_UP);
 		Kh=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
 		if(Kh)Kp=Kh==1;
@@ -122,10 +124,10 @@ int main(int argc,char**argv){
 			case(0)
 				if(n->x!=(int)n->x){
 					walk:n->x+=Pd/8.;
-				}else if(!Pu&&((o=oat(8,n->x,n->y+1))||Kh)){
+				}else if(!Pu&&((!anybut(0,n->x,n->y)&&(o=oat(8,n->x,n->y+1)))||Kh)){
 					Pd=Kh;
 					if(o)Pd+=o->d[1]?-1:1;
-					int pd=Pd>0?1:Pd<0?-1:0;
+					int pd=(Pd>0)-(Pd<0);
 					if(!((o=oat(7,n->x+pd,n->y))&&pd!=(o->d[0]?:-1)||oat(2,n->x+pd,n->y)||oat(3,n->x+pd,n->y)||oat(8,n->x+pd,n->y)||(oat(11,n->x+pd,n->y)&&any(n->x+pd*2,n->y)))){
 						if(o=oat(10,n->x+pd,n->y)){
 							if(Pk[o->d[0]]){
@@ -164,11 +166,9 @@ int main(int argc,char**argv){
 					Pk[o->d[0]]++;
 					del(o);
 				}
-				if(o=oat(10,n->x,n->y+1)){
-					if(Pk[o->d[0]]){
-						Pk[o->d[0]]--;
-						del(o);
-					}
+				if(!anybut(0,n->x,n->y)&&(o=oat(10,n->x,n->y+1))&&Pk[o->d[0]]){
+					Pk[o->d[0]]--;
+					del(o);
 				}
 				if(n->y!=(int)n->y){
 					vert:
@@ -224,7 +224,7 @@ int main(int argc,char**argv){
 				else if(n->x<P->x&&P->x-n->x<1)n->x=P->x-1;
 				else if((o=oat(8,n->x,n->y+1))&&!oat(1,n->x+(o->d[1]?2:-2),n->y)&&!oat(2,n->x+(o->d[1]?2:-2),n->y)&&!oat(3,n->x+(o->d[1]?2:-2),n->y))n->x+=(o->d[1]?:-1)/8.;
 				drawRect(n->x,n->y,7,3);
-				if(!any(n->x,n->y+1))n->y+=.5;
+				if(n->x==(int)n->x&&!any(n->x,n->y+1))n->y+=.5;
 			case(12)
 				glEnd();
 				glBindTexture(GL_TEXTURE_2D,0);
