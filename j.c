@@ -1,21 +1,7 @@
-#include <stdlib.h>
-#include <string.h>
-#include <GL/glfw.h>
-#include "tgen.h"
 #include "j.h"
-#define case(x) break;case x:;
-#define else(x) else if(x)
-GLuint Ts;
-typedef struct Obj{
-	struct Obj*n;
-	float x,y;
-	unsigned char t,d[];
-}Obj;
 Obj*P;
-int Pd,Pu,Pk[2],Kv,Kh,Kp;
-char sizeObj[]={0,0,0,1,0,2,1,1,2,1,1,0,1};
+int Pd,Pu,Pk[2],Kv,Kh,Kp,dott,dote;
 float*dots;
-int dott,dote;
 Obj*makeObj(char t,float x,float y,char*d){
 	Obj*r=malloc(sizeof(Obj)+sizeObj[t]);
 	r->t=t;
@@ -23,22 +9,6 @@ Obj*makeObj(char t,float x,float y,char*d){
 	r->y=y;
 	memcpy(r->d,d,sizeObj[t]);
 	return r;
-}
-
-void drawRect_(float x,float y,float a,float b,float h,float v){
-	a/=8;
-	b/=4;
-	glTexCoord2f(a,b);
-	glVertex2f(x+h,y+v);
-	glTexCoord2f(a+1./8,b);
-	glVertex2f(x+1-h,y+v);
-	glTexCoord2f(a+1./8,b+1./4);
-	glVertex2f(x+1-h,y+1-v);
-	glTexCoord2f(a,b+1./4);
-	glVertex2f(x+h,y+1-v);
-}
-void drawRect(float x,float y,float a,float b){
-	drawRect_(x,y,a,b,0,0);
 }
 
 void loadL(unsigned char*L){
@@ -111,7 +81,7 @@ int main(int argc,char**argv){
 	srand(glfwGetTime()*10e6);
 	for(;;){
 		if(P->y>64||glfwGetKey(GLFW_KEY_SPACE))loadL(*LL);
-		if(glfwGetKey(GLFW_KEY_ENTER)&&LL[0][0]==1&&LL[0][1]==1){
+		if(glfwGetKey(GLFW_KEY_ENTER)&&!LL[0][0]&&!LL[0][1]){
 			glfwSleep(.3);
 			loadL(*++LL);
 		}

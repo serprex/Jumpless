@@ -1,20 +1,6 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <GL/glfw.h>
-#include "tgen.h"
 #include "j.h"
-#define case(x) break;case x:;
-#define else(x) else if(x)
-GLuint Ts;
-typedef struct Obj{
-	struct Obj*n;
-	float x,y;
-	unsigned char t,d[];
-}Obj;
 Obj**Ps,*P,*Rost;
-int Pp,KT,BT,Ls=sizeof(L)/sizeof(char*),et;
-char sizeObj[]={0,0,0,1,0,2,1,1,2,1,1,0,1};
+int Pp,KT,BT,Ls=sizeof(L)/sizeof(char*)-1,et;
 Obj*makeObj(char t,float x,float y,char*d){
 	Obj*r=malloc(sizeof(Obj)+sizeObj[t]*2);
 	r->t=t;
@@ -25,21 +11,6 @@ Obj*makeObj(char t,float x,float y,char*d){
 	return r;
 }
 
-void drawRect_(float x,float y,float a,float b,float h,float v){
-	a/=8;
-	b/=4;
-	glTexCoord2f(a,b);
-	glVertex2f(x+h,y+v);
-	glTexCoord2f(a+1./8,b);
-	glVertex2f(x+1-h,y+v);
-	glTexCoord2f(a+1./8,b+1./4);
-	glVertex2f(x+1-h,y+1-v);
-	glTexCoord2f(a,b+1./4);
-	glVertex2f(x+h,y+1-v);
-}
-void drawRect(float x,float y,float a,float b){
-	drawRect_(x,y,a,b,0,0);
-}
 void drawObj(Obj*n){
 	switch(n->t){
 	case(0)drawRect(n->x,n->y,0,0);
@@ -79,7 +50,7 @@ Obj*oat(char t,float x,float y){
 }
 
 void dat(float x,float y){
-	for(Obj*n=P;n&&n->n;n=n->n)
+	for(Obj*n=P;n->n;n=n->n)
 		if(n->n->x==x&&n->n->y==y){
 			Obj*o=n->n;
 			n->n=n->n->n;
@@ -203,8 +174,8 @@ int main(int argc,char**argv){
 		glfwPollEvents();
 		if(glfwGetKey('S')&&!KT){
 			KT=9;
-			FILE*f=fopen("j.h","w");
-			fputs("unsigned char*L[]={",f);
+			FILE*f=fopen("jgen.h","w");
+			fputs("unsigned char ",f);
 			for(int i=0;i<Ls;i++){
 				int mnx=255,mny=255,mxx=0,mxy=0;
 				for(Obj*n=Ps[i];n;n=n->n){
@@ -213,14 +184,18 @@ int main(int argc,char**argv){
 					if(n->y<mny)mny=n->y;
 					if(n->y>mxy)mxy=n->y;
 				}
-				fprintf(f,"\"\\%o\\%o\\%o\\%o",mxx-mnx+1,mxy-mny+1,(int)Ps[i]->x-mnx,(int)Ps[i]->y-mny);
+				fprintf(f,"L%x[]={%d,%d,%d,%d,",i,mxx-mnx,mxy-mny,(int)Ps[i]->x-mnx,(int)Ps[i]->y-mny);
 				for(Obj*n=Ps[i]->n;n;n=n->n){
-					fprintf(f,"\\%o\\%o\\%o",n->t,(int)n->x-mnx,(int)n->y-mny);
+					fprintf(f,"%d,%d,%d,",n->t,(int)n->x-mnx,(int)n->y-mny);
 					for(int i=0;i<sizeObj[n->t];i++)
-						fprintf(f,"\\%o",n->d[i+sizeObj[n->t]]);
+						fprintf(f,"%d,",n->d[i+sizeObj[n->t]]);
 				}
-				fputs(i+1==Ls?"\"},**LL=L;":"\",",f);
+				fputs("},",f);
 			}
+			fputs("*L[]={",f);
+			for(int i=0;i<Ls;i++)
+				fprintf(f,"L%x,",i);
+			fputs("\"\\0\\0\\0\"},**LL=L;",f);
 			fclose(f);
 		}
 		if(glfwGetKey('Q')||!glfwGetWindowParam(GLFW_OPENED))return 0;
