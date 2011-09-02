@@ -13,7 +13,9 @@ typedef struct Obj{
 }Obj;
 Obj*P;
 int Pd,Pu,Pk[2],Kv,Kh,Kp;
-char sizeObj[]={0,0,0,1,0,2,1,1,2,1,1,0,8};
+char sizeObj[]={0,0,0,1,0,2,1,1,2,1,1,0,1};
+float*dots;
+int dott,dote;
 Obj*makeObj(char t,float x,float y,char*d){
 	Obj*r=malloc(sizeof(Obj)+sizeObj[t]);
 	r->t=t;
@@ -40,7 +42,7 @@ void drawRect(float x,float y,float a,float b){
 }
 
 void loadL(unsigned char*L){
-	Pk[0]=Pk[1]=0;
+	dott=dote=Pk[0]=Pk[1]=0;
 	for(Obj*h=P->n;h;){
 		Obj*n=h;
 		h=h->n;
@@ -109,7 +111,7 @@ int main(int argc,char**argv){
 	srand(glfwGetTime()*10e6);
 	for(;;){
 		if(P->y>64||glfwGetKey(GLFW_KEY_SPACE))loadL(*LL);
-		if(glfwGetKey(GLFW_KEY_ENTER)&&*(short*)*LL!=0x101){
+		if(glfwGetKey(GLFW_KEY_ENTER)&&LL[0][0]==1&&LL[0][1]==1){
 			glfwSleep(.3);
 			loadL(*++LL);
 		}
@@ -124,7 +126,7 @@ int main(int argc,char**argv){
 			case(0)
 				if(n->x!=(int)n->x){
 					walk:n->x+=Pd/8.;
-				}else if(!Pu&&((!anybut(0,n->x,n->y)&&(o=oat(8,n->x,n->y+1)))||Kh)){
+				}else(!Pu&&((!anybut(0,n->x,n->y)&&(o=oat(8,n->x,n->y+1)))||Kh)){
 					Pd=Kh;
 					if(o)Pd+=o->d[1]?-1:1;
 					int pd=(Pd>0)-(Pd<0);
@@ -138,13 +140,13 @@ int main(int argc,char**argv){
 						goto walk;
 					}
 					nokey:;
-				}else if(Kv&&((oat(5,n->x,n->y)&&!any(n->x,n->y+Kv))||(oat(4,n->x,n->y)&&!(oat(2,n->x,n->y+Kv)||oat(3,n->x,n->y+Kv)||oat(8,n->x,n->y+Kv)))&&!(((o=oat(6,n->x,n->y+Kv))&&Kv==(o->d[0]?:-1))||oat(8,n->x,n->y+Kv)||oat(10,n->x,n->y+Kv)))){
+				}else(Kv&&((oat(5,n->x,n->y)&&!any(n->x,n->y+Kv))||(oat(4,n->x,n->y)&&!(oat(2,n->x,n->y+Kv)||oat(3,n->x,n->y+Kv)||oat(8,n->x,n->y+Kv)))&&!(((o=oat(6,n->x,n->y+Kv))&&Kv==(o->d[0]?:-1))||oat(8,n->x,n->y+Kv)||oat(10,n->x,n->y+Kv)))){
 					Pu=Kv;
 					goto vert;
-				}else if(Kv==-1&&(o=oat(6,n->x,n->y))&&o->d[0]==1&&!(oat(2,n->x,n->y-1)||oat(3,n->x,n->y-1)||oat(8,n->x,n->y-1))){
+				}else(Kv==-1&&(o=oat(6,n->x,n->y))&&o->d[0]==1&&!(oat(2,n->x,n->y-1)||oat(3,n->x,n->y-1)||oat(8,n->x,n->y-1))){
 					Pu=-1;
 					goto vert;
-				}else if(Kv==1&&!(oat(2,n->x,n->y+1)||oat(3,n->x,n->y+1)||oat(8,n->x,n->y+1))&&(((o=oat(6,n->x,n->y))&&o->d[0]==0||(o=oat(6,n->x,n->y+1))&&o->d[0]==0)||(oat(4,n->x,n->y+1)&&!(oat(5,n->x,n->y)||((o=oat(6,n->x,n->y))&&o->d[0]==1))))){
+				}else(Kv==1&&!(oat(2,n->x,n->y+1)||oat(3,n->x,n->y+1)||oat(8,n->x,n->y+1))&&(((o=oat(6,n->x,n->y))&&o->d[0]==0||(o=oat(6,n->x,n->y+1))&&o->d[0]==0)||(oat(4,n->x,n->y+1)&&!(oat(5,n->x,n->y)||((o=oat(6,n->x,n->y))&&o->d[0]==1))))){
 					Pu=1;
 					goto vert;
 				}
@@ -155,11 +157,12 @@ int main(int argc,char**argv){
 					if(!(o->d[0]+=4))
 						del(o);
 					if(rand()&1){
-						o=makeObj(12,n->x+(rand()&7)/8.,n->y,sizeObj);
-						o->n=P->n;
-						P->n=o;
-						((float*)o->d)[0]=-(rand()&255)/4096.;
-						((float*)o->d)[1]=(4-(rand()%9))/96.;
+						if(dott==dote)dots=realloc(dots,(dote+=4)*4);
+						dots[dott]=n->x+(rand()&7)/8.;
+						dots[dott+1]=n->y;
+						dots[dott+2]=(4-(rand()%9))/96.;
+						dots[dott+3]=-(rand()&255)/4096.;
+						dott+=4;
 					}
 				}
 				if((o=oat(9,n->x,n->y))||(!anybut(0,n->x,n->y)&&(o=oat(9,n->x,n->y+1)))){
@@ -172,10 +175,9 @@ int main(int argc,char**argv){
 				}
 				if(n->y!=(int)n->y){
 					vert:
-					if(o=oat(5,n->x,n->y))
-						o->y+=Pu/8.;
+					if(o=oat(5,n->x,n->y))o->y+=Pu/8.;
 					n->y+=Pu/8.;
-				}else if(n->x==(int)n->x&&!any(n->x,n->y+1)&&!anybut(0,n->x,n->y)){
+				}else(n->x==(int)n->x&&!any(n->x,n->y+1)&&!anybut(0,n->x,n->y)){
 					Pu=4;
 					goto vert;
 				}else Pu=0;
@@ -221,27 +223,38 @@ int main(int argc,char**argv){
 			case(10)drawRect(n->x,n->y,4+n->d[0],1);
 			case(11)
 				if(P->x<n->x&&n->x-P->x<1)n->x=P->x+1;
-				else if(n->x<P->x&&P->x-n->x<1)n->x=P->x-1;
-				else if((o=oat(8,n->x,n->y+1))&&!oat(1,n->x+(o->d[1]?2:-2),n->y)&&!oat(2,n->x+(o->d[1]?2:-2),n->y)&&!oat(3,n->x+(o->d[1]?2:-2),n->y))n->x+=(o->d[1]?:-1)/8.;
+				else(n->x<P->x&&P->x-n->x<1)n->x=P->x-1;
+				else((o=oat(8,n->x,n->y+1))&&!oat(1,n->x+(o->d[1]?2:-2),n->y)&&!oat(2,n->x+(o->d[1]?2:-2),n->y)&&!oat(3,n->x+(o->d[1]?2:-2),n->y))n->x+=(o->d[1]?:-1)/8.;
 				drawRect(n->x,n->y,7,3);
 				if(n->x==(int)n->x&&!any(n->x,n->y+1))n->y+=.5;
 			case(12)
-				glEnd();
-				glBindTexture(GL_TEXTURE_2D,0);
-				glBegin(GL_POINTS);
-				glVertex2f(n->x+=((float*)n->d)[1],n->y+=((float*)n->d)[0]+=.02);
-				glEnd();
-				glBindTexture(GL_TEXTURE_2D,Ts);
-				glBegin(GL_QUADS);
-				if(n->y>64){
-					o=n->n;
-					del(n);
-					if(n=o)goto gomo;
-					goto nomo;
+				if(n->x==(int)n->x&&(anybut(0,n->x+(n->d[0]?:-1),n->y)||!anybut(0,n->x+(n->d[0]?:-1),n->y+1)))n->d[0]=!n->d[0];
+				n->x+=(n->d[0]?:-1)/8.;
+				drawRect_(n->x,n->y,0,0,n->d[0],0);
+				if(n->x>P->x-1&&n->x<P->x+1){
+					if(n->y==P->y){
+						loadL(*LL);
+						goto nomo;
+					}else(n->y>P->y&&n->y<P->y+1){
+					   o=n->n;
+					   del(n);
+					   if(n=o)goto gomo;
+					   goto nomo;
+					}
 				}
 			}
 		}
 		nomo:glEnd();
+		if(dott){
+			glBindTexture(GL_TEXTURE_2D,0);
+			glBegin(GL_POINTS);
+			for(int i=0;i<dott;i+=4){
+				glVertex2f(dots[i]+=dots[i+2],dots[i+1]+=dots[i+3]+=.03);
+				if(dots[i+1]>64)memmove(dots+i,dots+i+4,((dott-=4)-i)*4);
+			}
+			glEnd();
+			glBindTexture(GL_TEXTURE_2D,Ts);
+		}
 		glfwSwapBuffers();
 		double gT=1./59-glfwGetTime();
 		glfwSleep(gT);

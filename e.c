@@ -14,7 +14,7 @@ typedef struct Obj{
 }Obj;
 Obj**Ps,*P,*Rost;
 int Pp,KT,BT,Ls=sizeof(L)/sizeof(char*),et;
-char sizeObj[]={0,0,0,1,0,2,1,1,2,1,1,0};
+char sizeObj[]={0,0,0,1,0,2,1,1,2,1,1,0,1};
 Obj*makeObj(char t,float x,float y,char*d){
 	Obj*r=malloc(sizeof(Obj)+sizeObj[t]*2);
 	r->t=t;
@@ -54,11 +54,12 @@ void drawObj(Obj*n){
 	case(9)drawRect(n->x,n->y,n->d[0],1);
 	case(10)drawRect(n->x,n->y,4+n->d[0],1);
 	case(11)drawRect(n->x,n->y,7,3);
+	case(12)drawRect_(n->x,n->y,0,0,1,0);
 	}
 }
 
-char*chmem[]={"","","","\0","","\0\377","\0","\1","\0","\1","\0\1","\0\0","","\0","\1","\2","\3","\0","\1","\2","\3"},
-	chtype[]={0,1,2,3,4,5,6,6,7,7,8,8,11,9,9,9,9,10,10,10,10};
+char*chmem[]={"","","","\0","","\0\377","\0","\1","\0","\1","\0\1","\0\0","","\1","\0","\1","\2","\3","\0","\1","\2","\3"},
+	chtype[]={0,1,2,3,4,5,6,6,7,7,8,8,11,12,9,9,9,9,10,10,10,10};
 
 void loadL(unsigned char*L){
 	float Lx=64-L[0]>>1,Ly=64-L[1]>>1;
@@ -134,22 +135,22 @@ int main(int argc,char**argv){
 			KT=6;
 			Pp+=b;
 			if(Pp==Ls)Pp=0;
-			else if(Pp==-1)Pp=Ls-1;
+			else(Pp==-1)Pp=Ls-1;
 			P=Ps[Pp];
-		}else if((b=glfwGetKey('X')-glfwGetKey('Z'))&&!KT){
+		}else((b=glfwGetKey('X')-glfwGetKey('Z'))&&!KT){
 			KT=6;
 			b+=Pp;
 			if(b==Ls)b=0;
-			else if(b==-1)b=Ls-1;
+			else(b==-1)b=Ls-1;
 			P=Ps[Pp];
 			Ps[Pp]=Ps[b];
 			Ps[Pp=b]=P;
-		}else if(glfwGetKey('N')&&!KT){
+		}else(glfwGetKey('N')&&!KT){
 			KT=12;
 			Ps=realloc(Ps,sizeof(Obj*)*++Ls);
 			Ps[Pp=Ls-1]=P=makeObj(0,31,31,"");
 			P->n=0;
-		}else if(glfwGetKey(GLFW_KEY_BACKSPACE)&&!BT&&Ls>1){
+		}else(glfwGetKey(GLFW_KEY_BACKSPACE)&&!BT&&Ls>1){
 			BT=9;
 			memmove(Ps+Pp,Ps+Pp+1,(Ls-Pp-1)*sizeof(Obj*));
 			for(Obj*n=P,*o;n;o=n,n=n->n,free(o));
@@ -160,7 +161,7 @@ int main(int argc,char**argv){
 			glfwSetMouseWheel(0);
 			et+=b>0?:-1;
 			if(et==sizeof(chtype))et=0;
-			else if(et==-1)et=sizeof(chtype);
+			else(et==-1)et=sizeof(chtype);
 		}
 		if((glfwGetMouseButton(b=0)||glfwGetMouseButton(b=1)||glfwGetMouseButton(b=2))&&!BT){
 			BT=6;
@@ -171,10 +172,10 @@ int main(int argc,char**argv){
 			y/=wihe/64;
 			if(y==0&&x<sizeof(chtype)){
 				et=x;
-			}else if(!et){
+			}else(!et&&b!=2){
 				P->x=x;
 				P->y=y;
-			}else if(o=oat(chtype[et],x,y)){
+			}else(et&&(o=oat(chtype[et],x,y))){
 				del(o);
 			}else{
 				if(b!=1)dat(x,y);
