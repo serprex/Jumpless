@@ -172,7 +172,7 @@ int main(int argc,char**argv){
 		glfwSwapBuffers();
 		glfwSleep(1./30);
 		glfwPollEvents();
-		if(glfwGetKey('S')&&!KT){
+		if((glfwGetKey('S')||glfwGetKey('Q'))&&!KT){
 			KT=9;
 			FILE*f=fopen("jgen.h","w");
 			fputs("unsigned char ",f);

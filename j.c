@@ -1,6 +1,6 @@
 #include "j.h"
 Obj*P;
-int Pd,Pu,Pk[2],Kv,Kh,Kp,dott,dote;
+int Pd,Pu,Pk[4],Kv,Kh,Kp,dott,dote;
 float*dots;
 Obj*makeObj(char t,float x,float y,char*d){
 	Obj*r=malloc(sizeof(Obj)+sizeObj[t]);
@@ -12,7 +12,8 @@ Obj*makeObj(char t,float x,float y,char*d){
 }
 
 void loadL(unsigned char*L){
-	dott=dote=Pk[0]=Pk[1]=0;
+	dott=dote=0;
+	memset(Pk,0,sizeof(Pk));
 	for(Obj*h=P->n;h;){
 		Obj*n=h;
 		h=h->n;
@@ -81,7 +82,7 @@ int main(int argc,char**argv){
 	srand(glfwGetTime()*10e6);
 	for(;;){
 		if(P->y>64||glfwGetKey(GLFW_KEY_SPACE))loadL(*LL);
-		if(glfwGetKey(GLFW_KEY_ENTER)&&!LL[0][0]&&!LL[0][1]){
+		if(glfwGetKey(GLFW_KEY_ENTER)&&(LL[0][0]||LL[0][1])){
 			glfwSleep(.3);
 			loadL(*++LL);
 		}
@@ -110,13 +111,13 @@ int main(int argc,char**argv){
 						goto walk;
 					}
 					nokey:;
-				}else(Kv&&((oat(5,n->x,n->y)&&!any(n->x,n->y+Kv))||(oat(4,n->x,n->y)&&!(oat(2,n->x,n->y+Kv)||oat(3,n->x,n->y+Kv)||oat(8,n->x,n->y+Kv)))&&!(((o=oat(6,n->x,n->y+Kv))&&Kv==(o->d[0]?:-1))||oat(8,n->x,n->y+Kv)||oat(10,n->x,n->y+Kv)))){
+				}else(Kv&&((oat(5,n->x,n->y)&&!any(n->x,n->y+Kv))||(oat(4,n->x,n->y)&&!(oat(1,n->x,n->y+Kv)||oat(2,n->x,n->y+Kv)||oat(3,n->x,n->y+Kv)||oat(8,n->x,n->y+Kv)))&&!(((o=oat(6,n->x,n->y+Kv))&&Kv==(o->d[0]?:-1))||oat(8,n->x,n->y+Kv)||oat(10,n->x,n->y+Kv)))){
 					Pu=Kv;
 					goto vert;
-				}else(Kv==-1&&(o=oat(6,n->x,n->y))&&o->d[0]==1&&!(oat(2,n->x,n->y-1)||oat(3,n->x,n->y-1)||oat(8,n->x,n->y-1))){
+				}else(Kv==-1&&(o=oat(6,n->x,n->y))&&o->d[0]==1&&!(oat(1,n->x,n->y-1)||oat(2,n->x,n->y-1)||oat(3,n->x,n->y-1)||oat(8,n->x,n->y-1))){
 					Pu=-1;
 					goto vert;
-				}else(Kv==1&&!(oat(2,n->x,n->y+1)||oat(3,n->x,n->y+1)||oat(8,n->x,n->y+1))&&(((o=oat(6,n->x,n->y))&&o->d[0]==0||(o=oat(6,n->x,n->y+1))&&o->d[0]==0)||(oat(4,n->x,n->y+1)&&!(oat(5,n->x,n->y)||((o=oat(6,n->x,n->y))&&o->d[0]==1))))){
+				}else(Kv==1&&!(oat(1,n->x,n->y+1)||oat(2,n->x,n->y+1)||oat(3,n->x,n->y+1)||oat(8,n->x,n->y+1))&&(((o=oat(6,n->x,n->y))&&o->d[0]==0||(o=oat(6,n->x,n->y+1))&&o->d[0]==0)||(oat(4,n->x,n->y+1)&&!(oat(5,n->x,n->y)||((o=oat(6,n->x,n->y))&&o->d[0]==1))))){
 					Pu=1;
 					goto vert;
 				}
