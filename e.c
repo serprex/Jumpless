@@ -177,22 +177,23 @@ int main(int argc,char**argv){
 			FILE*f=fopen("jgen.h","w");
 			fputs("unsigned char ",f);
 			for(int i=0;i<Ls;i++){
-				int mnx=255,mny=255,mxx=0,mxy=0;
+				int mnx=255,mny=255,mxx=0,mxy=0,ns=1;
 				for(Obj*n=Ps[i];n;n=n->n){
+					ns+=3+sizeObj[n->t];
 					if(n->x<mnx)mnx=n->x;
 					if(n->x>mxx)mxx=n->x;
 					if(n->y<mny)mny=n->y;
 					if(n->y>mxy)mxy=n->y;
 				}
-				fprintf(f,"L%x[]={%d,%d,%d,%d,",i,mxx-mnx,mxy-mny,(int)Ps[i]->x-mnx,(int)Ps[i]->y-mny);
+				fprintf(f,"L%x[%d]=\"\\%o\\%o\\%o\\%o",i,ns,mxx-mnx,mxy-mny,(int)Ps[i]->x-mnx,(int)Ps[i]->y-mny);
 				for(Obj*n=Ps[i]->n;n;n=n->n){
-					fprintf(f,"%d,%d,%d,",n->t,(int)n->x-mnx,(int)n->y-mny);
+					fprintf(f,"\\%o\\%o\\%o",n->t,(int)n->x-mnx,(int)n->y-mny);
 					for(int i=0;i<sizeObj[n->t];i++)
-						fprintf(f,"%d,",n->d[i+sizeObj[n->t]]);
+						fprintf(f,"\\%o",n->d[i+sizeObj[n->t]]);
 				}
-				fputs("},",f);
+				fputs("\",",f);
 			}
-			fputs("*L[]={",f);
+			fprintf(f,"*L[%d]={",Ls+1);
 			for(int i=0;i<Ls;i++)
 				fprintf(f,"L%x,",i);
 			fputs("\"\\0\\0\\0\"},**LL=L;",f);
