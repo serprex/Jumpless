@@ -1,9 +1,9 @@
-CC=gcc -std=gnu99 -O3 -s
-CW=-fwhole-program -ffast-math -lglfw -lGL
-all:j e
+CFLAGS=-std=gnu99 -Ofast -s
 j:tgen.o
-	${CC} tgen.o j.c -o J ${CW}
-e:tgen.o
-	${CC} tgen.o e.c -o E ${CW}
+	${CC} ${CFLAGS} tgen.o j.c -o J ${CW} -lglfw -lGL -fwhole-program
+	${CC} ${CFLAGS} tgen.o e.c -o E ${CW} -lglfw -lGL -fwhole-program
+mingw:
+	i486-mingw32-gcc ${CFLAGS} tgen.c e.c -o J.exe -lglfw -lopengl32
+	i486-mingw32-gcc ${CFLAGS} tgen.c e.c -o E.exe -lglfw -lopengl32
 spr:spr/*
-	pinch g G
+	pinch g
