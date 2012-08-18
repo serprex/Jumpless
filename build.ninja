@@ -1,0 +1,18 @@
+cc=gcc
+gl=-fwhole-program -lGL
+rule cc
+ command=$cc -std=gnu11 -Ofast -s $in -o $out -lglfw $gl
+rule co
+ command=$cc -std=gnu11 -Ofast -s -c $in $out
+rule pinch
+ command=pinch g
+build tgen.c:pinch spr/g.png
+build tgen.o:co tgen.c
+build J:cc tgen.o j.c
+build E:cc tgen.o e.c
+build J.exe:cc tgen.c j.c
+ cc=i486-mingw32-gcc
+ gl=-lopengl32
+build E.exe:cc tgen.c e.c
+ cc=i486-mingw32-gcc
+ gl=-lopengl32
