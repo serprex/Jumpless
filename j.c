@@ -2,6 +2,7 @@
 Obj*P;
 int Pd,Pu,Pk[4],Kv,Kh,Kp,dott,dote;
 float*dots;
+GLFWwindow*wnd;
 Obj*makeObj(char t,float x,float y,char*d){
 	Obj*r=malloc(sizeof(Obj)+sizeObj[t]);
 	r->t=t;
@@ -59,13 +60,12 @@ int any(float x,float y){
 }
 int main(int argc,char**argv){
 	glfwInit();
-	glfwDisable(GLFW_AUTO_POLL_EVENTS);
-	{GLFWvidmode gvm;
-	glfwGetDesktopMode(&gvm);
-	int wihe=gvm.Height>1024?1024:gvm.Height>512?512:256;
-	glfwOpenWindow(wihe,wihe,0,0,0,0,0,0,GLFW_WINDOW);
+	const GLFWvidmode*gvm=glfwGetVideoMode(glfwGetPrimaryMonitor());
+	int wihe=gvm->height>1024?1024:gvm->height>512?512:256;
+	wnd=glfwCreateWindow(wihe,wihe,0,0,0);
+	glfwMakeContextCurrent(wnd);
 	glOrtho(0,64,64,0,1,-1);
-	glPointSize(wihe/512);}
+	glPointSize(wihe/512);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -79,15 +79,15 @@ int main(int argc,char**argv){
 	P->n=0;
 	if(argc>1)LL+=atoi(argv[1]);
 	loadL(*LL);
-	srand(glfwGetTime()*10e6);
+	initrand();
 	for(;;){
-		if(P->y>64||glfwGetKey(GLFW_KEY_SPACE))loadL(*LL);
-		if(glfwGetKey(GLFW_KEY_ENTER)&&(LL[0][0]||LL[0][1])){
-			glfwSleep(.3);
+		if(P->y>64||glfwGetKey(wnd,GLFW_KEY_SPACE))loadL(*LL);
+		if(glfwGetKey(wnd,GLFW_KEY_ENTER)&&(LL[0][0]||LL[0][1])){
+			sleepd(.3);
 			loadL(*++LL);
 		}
-		Kv=glfwGetKey(GLFW_KEY_DOWN)-glfwGetKey(GLFW_KEY_UP);
-		Kh=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
+		Kv=glfwGetKey(wnd,GLFW_KEY_DOWN)-glfwGetKey(wnd,GLFW_KEY_UP);
+		Kh=glfwGetKey(wnd,GLFW_KEY_RIGHT)-glfwGetKey(wnd,GLFW_KEY_LEFT);
 		if(Kh)Kp=Kh==1;
 		glClear(GL_COLOR_BUFFER_BIT);
 		glBegin(GL_QUADS);
@@ -127,12 +127,12 @@ int main(int argc,char**argv){
 				if(o=oat(3,n->x,n->y+1)){
 					if(!(o->d[0]+=4))
 						del(o);
-					if(rand()&1){
+					if(randint()&1){
 						if(dott==dote)dots=realloc(dots,(dote+=4)*4);
-						dots[dott]=n->x+(rand()&7)/8.;
+						dots[dott]=n->x+(randbyte()&7)/8.;
 						dots[dott+1]=n->y;
-						dots[dott+2]=(4-(rand()%9))/96.;
-						dots[dott+3]=-(rand()&255)/4096.;
+						dots[dott+2]=(4-(randto(9)))/96.;
+						dots[dott+3]=-(randbyte())/4096.;
 						dott+=4;
 					}
 				}
@@ -226,11 +226,9 @@ int main(int argc,char**argv){
 			glEnd();
 			glBindTexture(GL_TEXTURE_2D,Ts);
 		}
-		glfwSwapBuffers();
-		double gT=1./59-glfwGetTime();
-		glfwSleep(gT);
-		glfwSetTime(0);
+		glfwSwapBuffers(wnd);
+		endframe(60);
 		glfwPollEvents();
-		if(glfwGetKey('Q')||!glfwGetWindowParam(GLFW_OPENED))return 0;
+		if(glfwGetKey(wnd,'Q')||glfwWindowShouldClose(wnd))return 0;
 	}
 }

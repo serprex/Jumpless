@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <GL/glfw.h>
+#include <GLFW/glfw3.h>
+#include <winix/rand.h>
+#include <winix/time.h>
 #include "tgen.h"
 #include "jgen.h"
 GLuint Ts;
