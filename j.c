@@ -62,7 +62,7 @@ int main(int argc,char**argv){
 	glfwInit();
 	const GLFWvidmode*gvm=glfwGetVideoMode(glfwGetPrimaryMonitor());
 	int wihe=gvm->height>1024?1024:gvm->height>512?512:256;
-	wnd=glfwCreateWindow(wihe,wihe,0,0,0);
+	wnd=glfwCreateWindow(wihe,wihe,"",0,0);
 	glfwMakeContextCurrent(wnd);
 	glOrtho(0,64,64,0,1,-1);
 	glPointSize(wihe/512);
