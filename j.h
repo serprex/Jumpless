@@ -7,6 +7,7 @@
 #include "tgen.h"
 #include "jgen.h"
 GLuint Ts;
+GLFWwindow*wnd;
 typedef struct Obj{
 	struct Obj*n;
 	float x,y;

@@ -68,13 +68,20 @@ void del(Obj*o){
 		}
 }
 
+void scrollcb(GLFWwindow*wnd, double dx, double dy){
+	double sc=dx+dy;
+	et+=(sc>0)-(sc<0);
+	if(et==sizeof(chtype))et=0;
+	else(et==-1)et=sizeof(chtype);
+}
+
 int main(int argc,char**argv){
 	glfwInit();
-	glfwDisable(GLFW_AUTO_POLL_EVENTS);
-	GLFWvidmode gvm;
-	glfwGetDesktopMode(&gvm);
-	int wihe=gvm.Height>1024?1024:gvm.Height>512?512:256;
-	glfwOpenWindow(wihe,wihe,0,0,0,0,0,0,GLFW_WINDOW);
+	const GLFWvidmode*gvm=glfwGetVideoMode(glfwGetPrimaryMonitor());
+	int wihe=gvm->height>1024?1024:gvm->height>512?512:256;
+	wnd=glfwCreateWindow(wihe,wihe,"",0,0);
+	glfwMakeContextCurrent(wnd);
+	glfwSetScrollCallback(wnd,scrollcb);
 	glOrtho(0,64,64,0,1,-1);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -102,13 +109,13 @@ int main(int argc,char**argv){
 		int b;
 		KT-=KT>0;
 		BT-=BT>0;
-		if((b=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT))&&!KT){
+		if((b=glfwGetKey(wnd,GLFW_KEY_RIGHT)-glfwGetKey(wnd,GLFW_KEY_LEFT))&&!KT){
 			KT=6;
 			Pp+=b;
 			if(Pp==Ls)Pp=0;
 			else(Pp==-1)Pp=Ls-1;
 			P=Ps[Pp];
-		}else((b=glfwGetKey('X')-glfwGetKey('Z'))&&!KT){
+		}else((b=glfwGetKey(wnd,'X')-glfwGetKey(wnd,'Z'))&&!KT){
 			KT=6;
 			b+=Pp;
 			if(b==Ls)b=0;
@@ -116,29 +123,24 @@ int main(int argc,char**argv){
 			P=Ps[Pp];
 			Ps[Pp]=Ps[b];
 			Ps[Pp=b]=P;
-		}else(glfwGetKey('N')&&!KT){
+		}else(glfwGetKey(wnd,'N')&&!KT){
 			KT=12;
 			Ps=realloc(Ps,sizeof(Obj*)*++Ls);
 			Ps[Pp=Ls-1]=P=makeObj(0,31,31,"");
 			P->n=0;
-		}else(glfwGetKey(GLFW_KEY_BACKSPACE)&&!BT&&Ls>1){
+		}else(glfwGetKey(wnd,GLFW_KEY_BACKSPACE)&&!BT&&Ls>1){
 			BT=9;
 			memmove(Ps+Pp,Ps+Pp+1,(Ls-Pp-1)*sizeof(Obj*));
 			for(Obj*n=P,*o;n;o=n,n=n->n,free(o));
 			Ps=realloc(Ps,sizeof(Obj*)*--Ls);
 			P=Ps[Pp-=Pp==Ls];
 		}
-		if(b=glfwGetMouseWheel()){
-			glfwSetMouseWheel(0);
-			et+=b>0?:-1;
-			if(et==sizeof(chtype))et=0;
-			else(et==-1)et=sizeof(chtype);
-		}
-		if((glfwGetMouseButton(b=0)||glfwGetMouseButton(b=1)||glfwGetMouseButton(b=2))&&!BT){
+		if((glfwGetMouseButton(wnd,b=0)||glfwGetMouseButton(wnd,b=1)||glfwGetMouseButton(wnd,b=2))&&!BT){
 			BT=6;
 			Obj*o;
-			int x,y;
-			glfwGetMousePos(&x,&y);
+			double dx,dy;
+			glfwGetCursorPos(wnd,&dx,&dy);
+			int x=dx,y=dy;
 			x/=wihe/64;
 			y/=wihe/64;
 			if(y==0&&x<sizeof(chtype)){
@@ -169,10 +171,10 @@ int main(int argc,char**argv){
 		glRecti(et,0,et+1,1);
 		glDisable(GL_COLOR_LOGIC_OP);
 		glBindTexture(GL_TEXTURE_2D,Ts);
-		glfwSwapBuffers();
-		glfwSleep(1./30);
+		glfwSwapBuffers(wnd);
+		sleepd(1./30);
 		glfwPollEvents();
-		if((glfwGetKey('S')||glfwGetKey('Q'))&&!KT){
+		if((glfwGetKey(wnd,'S')||glfwGetKey(wnd,'Q'))&&!KT){
 			KT=9;
 			FILE*f=fopen("jgen.h","w");
 			fputs("unsigned char ",f);
@@ -199,6 +201,6 @@ int main(int argc,char**argv){
 			fputs("\"\\0\\0\\0\"},**LL=L;",f);
 			fclose(f);
 		}
-		if(glfwGetKey('Q')||!glfwGetWindowParam(GLFW_OPENED))return 0;
+		if(glfwGetKey(wnd,'Q')||glfwWindowShouldClose(wnd))return 0;
 	}
 }

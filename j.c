@@ -2,7 +2,6 @@
 Obj*P;
 int Pd,Pu,Pk[4],Kv,Kh,Kp,dott,dote;
 float*dots;
-GLFWwindow*wnd;
 Obj*makeObj(char t,float x,float y,char*d){
 	Obj*r=malloc(sizeof(Obj)+sizeObj[t]);
 	r->t=t;

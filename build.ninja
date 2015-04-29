@@ -16,3 +16,4 @@ build J.exe:cc tgen.c j.c
 build E.exe:cc tgen.c e.c
  cc=i486-mingw32-gcc
  gl=-lopengl32
+default J E
